@@ -99,3 +99,44 @@ coverage.xml
 
 # Refactored app (keeping only antara_engine and frontend)
 refactored_app/
+
+# Cleanup rules to prevent repository clutter
+# Test files
+test_*.py
+test_*.db
+*_test.py
+
+# Documentation drafts and analysis files
+*_ANALYSIS.md
+*_SUMMARY.md
+*_GUIDE.md
+*_INSTRUCTIONS.md
+*_CHECKLIST.md
+*_OVERVIEW.md
+*_ENHANCEMENTS.md
+*_SYSTEM.md
+*_FIXES.md
+DEPLOYMENT_*.md
+FEATURE_*.md
+MEMORY_*.md
+TIME_*.md
+YOUTUBE_*.md
+INTELLIGENT_*.md
+NLTK_*.md
+TWO_LAYER_*.md
+REFACTORING_*.md
+COMPLETE_*.md
+FINAL_*.md
+Gen_AI_*.md
+
+# Build and deployment artifacts
+*.bat
+run_*.py
+setup.py
+get_*.py
+APP.PY
+
+# Backup and old directories
+backup_*/
+old_*/
+archive_*/
