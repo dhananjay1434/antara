@@ -125,13 +125,13 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ userId }) => {
         setIsSynthesizing(true);
         setSynthesisStep(0);
 
-        // Animate synthesis steps
-        setTimeout(() => setSynthesisStep(1), 300);
-        setTimeout(() => setSynthesisStep(2), 600);
-        setTimeout(() => setSynthesisStep(3), 900);
-        setTimeout(() => setSynthesisStep(4), 1200);
+        // Animate synthesis steps with longer timing for better appreciation
+        setTimeout(() => setSynthesisStep(1), 800);   // Increased from 300ms
+        setTimeout(() => setSynthesisStep(2), 1600);  // Increased from 600ms
+        setTimeout(() => setSynthesisStep(3), 2400);  // Increased from 900ms
+        setTimeout(() => setSynthesisStep(4), 3200);  // Increased from 1200ms
 
-        // Wait 2 seconds then fade out and start response
+        // Wait 5 seconds then fade out and start response (increased from 2 seconds)
         setTimeout(async () => {
           setIsSynthesizing(false);
           setSynthesisStep(0);
@@ -165,7 +165,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ userId }) => {
             );
           });
           setIsLoading(false);
-        }, 2000);
+        }, 5000); // Increased from 2000ms to allow full appreciation of synthesis
 
       } else {
         // Normal message flow
@@ -306,36 +306,36 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ userId }) => {
                 <Sparkles className="w-4 h-4 animate-pulse" />
               </div>
             </div>
-            <div className="px-6 py-4 rounded-2xl bg-gradient-to-r from-cosmic-700/40 to-purple-900/40 border border-antara-500/30 min-w-[300px]">
-              <div className="text-antara-300 text-sm font-medium mb-3 flex items-center">
-                <div className="w-2 h-2 bg-antara-500 rounded-full animate-pulse mr-2"></div>
+            <div className="px-6 py-5 rounded-2xl bg-gradient-to-r from-cosmic-700/50 to-purple-900/50 border border-antara-500/40 min-w-[350px] shadow-xl shadow-antara-500/10">
+              <div className="text-antara-200 text-base font-semibold mb-4 flex items-center">
+                <div className="w-3 h-3 bg-antara-400 rounded-full animate-pulse mr-3 shadow-lg shadow-antara-500/50"></div>
                 Synthesizing Core Emotions...
               </div>
-              <div className="flex flex-wrap gap-2">
-                <div className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-300 ${
+              <div className="flex flex-wrap gap-3">
+                <div className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-500 ${
                   synthesisStep >= 1
-                    ? 'bg-red-500/20 text-red-300 border border-red-500/30 opacity-100 scale-100'
+                    ? 'bg-red-500/30 text-red-200 border border-red-400/50 opacity-100 scale-100 shadow-lg shadow-red-500/20'
                     : 'opacity-0 scale-75'
                 }`}>
                   [Comparison]
                 </div>
-                <div className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-300 ${
+                <div className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-500 ${
                   synthesisStep >= 2
-                    ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30 opacity-100 scale-100'
+                    ? 'bg-blue-500/30 text-blue-200 border border-blue-400/50 opacity-100 scale-100 shadow-lg shadow-blue-500/20'
                     : 'opacity-0 scale-75'
                 }`}>
                   [Isolation]
                 </div>
-                <div className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-300 ${
+                <div className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-500 ${
                   synthesisStep >= 3
-                    ? 'bg-orange-500/20 text-orange-300 border border-orange-500/30 opacity-100 scale-100'
+                    ? 'bg-orange-500/30 text-orange-200 border border-orange-400/50 opacity-100 scale-100 shadow-lg shadow-orange-500/20'
                     : 'opacity-0 scale-75'
                 }`}>
                   [Perceived Failure]
                 </div>
-                <div className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-300 ${
+                <div className={`px-4 py-2 rounded-full text-sm font-semibold transition-all duration-500 ${
                   synthesisStep >= 4
-                    ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30 opacity-100 scale-100'
+                    ? 'bg-purple-500/30 text-purple-200 border border-purple-400/50 opacity-100 scale-100 shadow-lg shadow-purple-500/20'
                     : 'opacity-0 scale-75'
                 }`}>
                   [Pressure]
