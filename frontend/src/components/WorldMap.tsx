@@ -12,10 +12,14 @@ const WorldMap: React.FC<WorldMapProps> = ({ userId }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    loadWorldNodes();
+    if (userId) {
+      loadWorldNodes();
+    }
   }, [userId]);
 
   const loadWorldNodes = async () => {
+    if (!userId) return;
+
     try {
       setIsLoading(true);
       const nodes = await worldAPI.getWorldNodes(userId);

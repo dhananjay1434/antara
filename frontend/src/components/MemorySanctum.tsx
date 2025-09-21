@@ -13,10 +13,14 @@ const MemorySanctum: React.FC<MemorySanctumProps> = ({ userId }) => {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(null);
 
   useEffect(() => {
-    loadMemories();
+    if (userId) {
+      loadMemories();
+    }
   }, [userId]);
 
   const loadMemories = async () => {
+    if (!userId) return;
+
     try {
       setIsLoading(true);
       const memoryData = await memoryAPI.getMemories(userId);

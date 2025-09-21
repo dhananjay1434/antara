@@ -15,7 +15,9 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ userId }) => {
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    loadChatHistory();
+    if (userId) {
+      loadChatHistory();
+    }
   }, [userId]);
 
   useEffect(() => {
@@ -23,6 +25,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ userId }) => {
   }, [messages]);
 
   const loadChatHistory = async () => {
+    if (!userId) return;
+
     try {
       const history = await chatAPI.getChatHistory(userId);
       setMessages(history);
