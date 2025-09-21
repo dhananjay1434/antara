@@ -64,17 +64,58 @@ class ChatService:
             recent_messages = db.query(ChatMessage).filter(
                 ChatMessage.user_id == user_id
             ).order_by(ChatMessage.timestamp.desc()).limit(5).all()
-            
-            # Build context
-            context = ""
+
+            # Get user's world nodes (Inner World context) for personalization
+            world_nodes = db.query(WorldNode).filter(
+                WorldNode.user_id == user_id
+            ).order_by(WorldNode.created_at.desc()).limit(3).all()
+
+            # Get user's important memories for personalization
+            memories = db.query(Memory).filter(
+                Memory.user_id == user_id
+            ).order_by(Memory.importance.desc(), Memory.timestamp.desc()).limit(3).all()
+
+            # Build comprehensive context with Inner World personalization
+            context_parts = []
+
+            # Add recent conversation context
             if recent_messages:
-                context = "\n".join([
-                    f"{msg.role}: {msg.content}" 
+                recent_context = "\n".join([
+                    f"{msg.role}: {msg.content}"
                     for msg in reversed(recent_messages)
                 ])
-            
-            # Create prompt with system instructions and context
-            full_prompt = f"{ANTARA_SYSTEM_PROMPT}\n\nRecent context:\n{context}\n\nUser: {user_input}\n\nDream Weaver:"
+                context_parts.append(f"Recent Conversation:\n{recent_context}")
+
+            # Add Inner World context (world nodes)
+            if world_nodes:
+                world_context = "\n".join([
+                    f"- {node.title}: {node.summary}" + (f" [Action: {node.user_action}]" if node.user_action else "")
+                    for node in world_nodes
+                ])
+                context_parts.append(f"User's Inner World (Previous Journey Stars):\n{world_context}")
+
+            # Add memory context for deeper personalization
+            if memories:
+                memory_context = "\n".join([
+                    f"- {memory.text} (importance: {memory.importance}/10)"
+                    for memory in memories
+                ])
+                context_parts.append(f"Sacred Memories:\n{memory_context}")
+
+            # Combine all context
+            full_context = "\n\n".join(context_parts) if context_parts else "This is the beginning of your journey together."
+
+            # Create enhanced prompt with comprehensive personalization
+            full_prompt = f"""{ANTARA_SYSTEM_PROMPT}
+
+PERSONALIZATION CONTEXT:
+{full_context}
+
+Remember: Use this context to provide deeply personalized responses that acknowledge the user's journey, reference their previous experiences, and build upon their Inner World. Weave their past insights and commitments into your mystical guidance.
+
+Current User Message: {user_input}
+
+Dream Weaver:"""
             
             # Generate response
             response = self.model.generate_content(full_prompt)
