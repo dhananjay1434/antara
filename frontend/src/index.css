@@ -1,0 +1,83 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-cosmic-700;
+  }
+  body {
+    @apply bg-cosmic-900 text-cosmic-100 font-mystical;
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  .mystical-glow {
+    @apply shadow-lg;
+    box-shadow: 0 0 20px rgba(236, 72, 153, 0.3);
+  }
+  
+  .cosmic-card {
+    @apply bg-cosmic-800/50 backdrop-blur-sm border border-cosmic-700/50 rounded-xl;
+  }
+  
+  .dream-text {
+    @apply text-cosmic-200 leading-relaxed;
+  }
+  
+  .typewriter-effect {
+    overflow: hidden;
+    border-right: 2px solid #ec4899;
+    white-space: nowrap;
+    animation: typewriter 2s steps(40) 1s 1 normal both, blink-caret 1s step-end infinite;
+  }
+  
+  @keyframes blink-caret {
+    from, to { border-color: transparent; }
+    50% { border-color: #ec4899; }
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-cosmic-800;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-antara-500 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-antara-400;
+}
+
+/* Chat message improvements */
+.dream-text {
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  hyphens: auto;
+  line-height: 1.6;
+}
+
+/* Ensure proper flex behavior for chat container */
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.messages-area {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+}

@@ -1,0 +1,23 @@
+# FastAPI and web framework dependencies
+fastapi
+uvicorn[standard]
+python-multipart
+python-dotenv
+
+# Database dependencies
+sqlalchemy
+
+# AI/ML dependencies
+google-generativeai
+
+# Validation and serialization
+pydantic
+pydantic-settings
+
+# CORS and security
+python-jose[cryptography]
+passlib[bcrypt]
+
+# Utilities
+requests
+python-dateutil
