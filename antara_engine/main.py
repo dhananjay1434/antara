@@ -69,6 +69,24 @@ async def startup_event():
     create_tables()
     logger.info("Antarā Engine started successfully")
 
+# Root endpoint
+@app.get("/")
+async def root():
+    """Root endpoint - API information"""
+    return {
+        "service": "Antarā Engine",
+        "version": "1.0.0",
+        "status": "running",
+        "description": "The backend engine for the Antarā prototype - A mystical AI companion",
+        "endpoints": {
+            "health": "/health",
+            "chat": "/chat",
+            "users": "/users",
+            "world": "/world/{user_id}",
+            "memories": "/memories/{user_id}"
+        }
+    }
+
 # Health check endpoint
 @app.get("/health")
 async def health_check():
