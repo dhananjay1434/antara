@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Send, Sparkles, User } from 'lucide-react';
-import { chatAPI, ChatMessage } from '../services/api';
+import { chatAPI, actionAPI, ChatMessage } from '../services/api';
 
 interface ChatWindowProps {
   userId: string;
@@ -11,6 +11,11 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ userId }) => {
   const [inputMessage, setInputMessage] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
+  const [isSynthesizing, setIsSynthesizing] = useState(false);
+  const [synthesisStep, setSynthesisStep] = useState(0);
+  const [currentNodeId, setCurrentNodeId] = useState<number | null>(null);
+  const [actionInput, setActionInput] = useState('');
+  const [isActionSubmitted, setIsActionSubmitted] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatContainerRef = useRef<HTMLDivElement>(null);
 
@@ -48,6 +53,28 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ userId }) => {
     }
   };
 
+  const handleMagicMoment = (nodeId: number) => {
+    setCurrentNodeId(nodeId);
+    setIsActionSubmitted(false); // Reset in case of another magic moment
+  };
+
+  const handleActionSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!currentNodeId || !actionInput.trim()) return;
+
+    try {
+      await actionAPI.saveActionForNode(currentNodeId, actionInput);
+      setIsActionSubmitted(true); // Show confirmation
+      setTimeout(() => {
+        setCurrentNodeId(null); // Hide the prompt after a delay
+      }, 2000);
+      setActionInput('');
+    } catch (error) {
+      console.error("Failed to submit action:", error);
+      // You could add some user-facing error state here
+    }
+  };
+
   const typewriterEffect = (text: string, callback: (displayText: string) => void) => {
     let i = 0;
     const speed = 30; // Typing speed in milliseconds
@@ -75,33 +102,103 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ userId }) => {
     };
 
     setMessages(prev => [...prev, userMessage]);
+    const currentInput = inputMessage;
     setInputMessage('');
     setIsLoading(true);
 
+    // Check if this is a Crystal Labyrinth trigger
+    const crystalTriggers = [
+      'everyone else is better than me',
+      'everyone else has it all figured out',
+      'i feel like everyone else',
+      'everyone is better than me',
+      'others are better than me'
+    ];
+
+    const isCrystalTrigger = crystalTriggers.some(trigger =>
+      currentInput.toLowerCase().includes(trigger)
+    );
+
     try {
-      const response = await chatAPI.sendMessage(inputMessage, userId);
-      
-      // Add AI message with typewriter effect
-      const aiMessage: ChatMessage = {
-        role: 'assistant',
-        content: '',
-        timestamp: new Date().toISOString(),
-      };
-      
-      setMessages(prev => [...prev, aiMessage]);
-      setIsTyping(true);
-      
-      // Simulate typewriter effect
-      typewriterEffect(response.response, (displayText) => {
-        setMessages(prev => 
-          prev.map((msg, index) => 
-            index === prev.length - 1 
-              ? { ...msg, content: displayText }
-              : msg
-          )
-        );
-      });
-      
+      if (isCrystalTrigger) {
+        // Start synthesis visualization
+        setIsSynthesizing(true);
+        setSynthesisStep(0);
+
+        // Animate synthesis steps
+        setTimeout(() => setSynthesisStep(1), 300);
+        setTimeout(() => setSynthesisStep(2), 600);
+        setTimeout(() => setSynthesisStep(3), 900);
+        setTimeout(() => setSynthesisStep(4), 1200);
+
+        // Wait 2 seconds then fade out and start response
+        setTimeout(async () => {
+          setIsSynthesizing(false);
+          setSynthesisStep(0);
+
+          // Get the actual response
+          const response = await chatAPI.sendMessage(currentInput, userId);
+
+          // Check for Magic Moment node_id
+          if (response.node_id) {
+            handleMagicMoment(response.node_id);
+          }
+
+          // Add AI message with typewriter effect
+          const aiMessage: ChatMessage = {
+            role: 'assistant',
+            content: '',
+            timestamp: new Date().toISOString(),
+          };
+
+          setMessages(prev => [...prev, aiMessage]);
+          setIsTyping(true);
+
+          // Simulate typewriter effect
+          typewriterEffect(response.response, (displayText) => {
+            setMessages(prev =>
+              prev.map((msg, index) =>
+                index === prev.length - 1
+                  ? { ...msg, content: displayText }
+                  : msg
+              )
+            );
+          });
+          setIsLoading(false);
+        }, 2000);
+
+      } else {
+        // Normal message flow
+        const response = await chatAPI.sendMessage(currentInput, userId);
+
+        // Check for Magic Moment node_id (in case of non-synthesis triggers)
+        if (response.node_id) {
+          handleMagicMoment(response.node_id);
+        }
+
+        // Add AI message with typewriter effect
+        const aiMessage: ChatMessage = {
+          role: 'assistant',
+          content: '',
+          timestamp: new Date().toISOString(),
+        };
+
+        setMessages(prev => [...prev, aiMessage]);
+        setIsTyping(true);
+
+        // Simulate typewriter effect
+        typewriterEffect(response.response, (displayText) => {
+          setMessages(prev =>
+            prev.map((msg, index) =>
+              index === prev.length - 1
+                ? { ...msg, content: displayText }
+                : msg
+            )
+          );
+        });
+        setIsLoading(false);
+      }
+
     } catch (error) {
       console.error('Failed to send message:', error);
       const errorMessage: ChatMessage = {
@@ -110,8 +207,8 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ userId }) => {
         timestamp: new Date().toISOString(),
       };
       setMessages(prev => [...prev, errorMessage]);
-    } finally {
       setIsLoading(false);
+      setIsSynthesizing(false);
     }
   };
 
@@ -184,7 +281,7 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ userId }) => {
           </div>
         ))}
         
-        {isLoading && (
+        {isLoading && !isSynthesizing && (
           <div className="flex justify-start">
             <div className="flex mr-3">
               <div className="w-8 h-8 rounded-full bg-cosmic-700/50 text-cosmic-300 flex items-center justify-center">
@@ -200,9 +297,93 @@ const ChatWindow: React.FC<ChatWindowProps> = ({ userId }) => {
             </div>
           </div>
         )}
+
+        {/* Synthesis Visualization */}
+        {isSynthesizing && (
+          <div className="flex justify-start">
+            <div className="flex mr-3">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-antara-500 to-purple-500 text-white flex items-center justify-center">
+                <Sparkles className="w-4 h-4 animate-pulse" />
+              </div>
+            </div>
+            <div className="px-6 py-4 rounded-2xl bg-gradient-to-r from-cosmic-700/40 to-purple-900/40 border border-antara-500/30 min-w-[300px]">
+              <div className="text-antara-300 text-sm font-medium mb-3 flex items-center">
+                <div className="w-2 h-2 bg-antara-500 rounded-full animate-pulse mr-2"></div>
+                Synthesizing Core Emotions...
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <div className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-300 ${
+                  synthesisStep >= 1
+                    ? 'bg-red-500/20 text-red-300 border border-red-500/30 opacity-100 scale-100'
+                    : 'opacity-0 scale-75'
+                }`}>
+                  [Comparison]
+                </div>
+                <div className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-300 ${
+                  synthesisStep >= 2
+                    ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30 opacity-100 scale-100'
+                    : 'opacity-0 scale-75'
+                }`}>
+                  [Isolation]
+                </div>
+                <div className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-300 ${
+                  synthesisStep >= 3
+                    ? 'bg-orange-500/20 text-orange-300 border border-orange-500/30 opacity-100 scale-100'
+                    : 'opacity-0 scale-75'
+                }`}>
+                  [Perceived Failure]
+                </div>
+                <div className={`px-3 py-1 rounded-full text-xs font-medium transition-all duration-300 ${
+                  synthesisStep >= 4
+                    ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30 opacity-100 scale-100'
+                    : 'opacity-0 scale-75'
+                }`}>
+                  [Pressure]
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
         
         <div ref={messagesEndRef} />
       </div>
+
+      {/* Action Prompt - From Metaphor to Mastery */}
+      {currentNodeId && (
+        <div className="mx-6 mb-4 p-6 border border-antara-500/50 rounded-xl bg-gradient-to-r from-antara-900/20 to-purple-900/20 backdrop-blur-sm transition-all duration-500">
+          {!isActionSubmitted ? (
+            <form onSubmit={handleActionSubmit}>
+              <div className="flex items-center mb-3">
+                <Sparkles className="w-5 h-5 text-antara-400 mr-2 animate-pulse" />
+                <p className="text-antara-300 font-medium">
+                  We've mapped this labyrinth. What is one small stone you can turn over tomorrow to find a new path?
+                </p>
+              </div>
+              <input
+                type="text"
+                value={actionInput}
+                onChange={(e) => setActionInput(e.target.value)}
+                className="w-full bg-cosmic-800/50 border border-cosmic-600/50 rounded-lg px-4 py-3 text-cosmic-100 placeholder-cosmic-400 focus:outline-none focus:ring-2 focus:ring-antara-500/50 focus:border-antara-500/50 mb-3"
+                placeholder="e.g., Talk to one friend about my project..."
+                autoFocus
+              />
+              <button
+                type="submit"
+                disabled={!actionInput.trim()}
+                className="w-full bg-antara-500 hover:bg-antara-600 disabled:bg-cosmic-700 disabled:text-cosmic-500 text-white font-semibold py-3 px-4 rounded-lg transition-colors duration-200"
+              >
+                Anchor This Intention
+              </button>
+            </form>
+          ) : (
+            <div className="text-center">
+              <Sparkles className="w-8 h-8 text-green-400 mx-auto mb-3 animate-pulse" />
+              <p className="text-green-400 font-medium">Your intention has been anchored to this memory.</p>
+              <p className="text-cosmic-400 text-sm mt-2">The labyrinth remembers your commitment.</p>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Input Area */}
       <div className="p-6 border-t border-cosmic-700/50 flex-shrink-0">

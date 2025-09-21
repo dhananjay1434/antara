@@ -63,11 +63,12 @@ class Memory(Base):
 
 class WorldNode(Base):
     __tablename__ = "world_nodes"
-    
+
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(String, ForeignKey("users.user_id"), nullable=False)
     title = Column(String, nullable=False)
     summary = Column(Text, nullable=False)
+    user_action = Column(String, nullable=True)
     created_at = Column(DateTime, default=datetime.utcnow)
     
     # Relationships

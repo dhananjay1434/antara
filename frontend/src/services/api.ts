@@ -52,6 +52,16 @@ export const chatAPI = {
   },
 };
 
+// Action API
+export const actionAPI = {
+  saveActionForNode: async (nodeId: number, actionText: string) => {
+    const response = await api.post(`/world-nodes/${nodeId}/action`, {
+      action_text: actionText,
+    });
+    return response.data;
+  },
+};
+
 // User API
 export const userAPI = {
   createUser: async (userId: string, username: string) => {

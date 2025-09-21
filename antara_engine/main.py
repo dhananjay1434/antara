@@ -46,6 +46,7 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     response: str
     user_id: str
+    node_id: Optional[int] = None
 
 class WorldNodeResponse(BaseModel):
     id: int
@@ -62,6 +63,9 @@ class MemoryResponse(BaseModel):
 class UserCreate(BaseModel):
     user_id: str
     username: str
+
+class UserAction(BaseModel):
+    action_text: str
 
 # Startup event
 @app.on_event("startup")
@@ -145,12 +149,12 @@ async def chat(request: ChatRequest, db: Session = Depends(get_db)):
         await chat_service.save_message(request.user_id, "user", request.message, db)
         
         # Generate AI response
-        ai_response = await chat_service.generate_response(request.message, request.user_id, db)
-        
+        ai_response, node_id = await chat_service.generate_response(request.message, request.user_id, db)
+
         # Save AI response
         await chat_service.save_message(request.user_id, "assistant", ai_response, db)
-        
-        return ChatResponse(response=ai_response, user_id=request.user_id)
+
+        return ChatResponse(response=ai_response, user_id=request.user_id, node_id=node_id)
         
     except Exception as e:
         logger.error(f"Error in chat endpoint: {e}")
@@ -242,6 +246,24 @@ async def delete_memory(memory_id: int, db: Session = Depends(get_db)):
     except Exception as e:
         logger.error(f"Error deleting memory: {e}")
         raise HTTPException(status_code=500, detail="Failed to delete memory")
+
+# Action anchoring endpoint
+@app.post("/world-nodes/{node_id}/action")
+async def save_user_action(
+    node_id: int,
+    user_action: UserAction,
+    db: Session = Depends(get_db)
+):
+    """Save a user action to a specific world node"""
+    try:
+        result = await chat_service.anchor_action_to_node(node_id, user_action.action_text, db)
+        return result
+
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        logger.error(f"Error saving user action: {e}")
+        raise HTTPException(status_code=500, detail="Failed to save user action")
 
 if __name__ == "__main__":
     import uvicorn

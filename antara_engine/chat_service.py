@@ -29,17 +29,35 @@ class ChatService:
         user_input_lower = user_input.lower()
         return any(trigger in user_input_lower for trigger in CRYSTAL_LABYRINTH_TRIGGERS)
     
-    async def generate_response(self, user_input: str, user_id: str, db: Session) -> str:
+    async def generate_response(self, user_input: str, user_id: str, db: Session) -> tuple[str, int | None]:
         """Generate AI response using Dream Weaver system prompt"""
-        
+
+        node_id_for_frontend = None
+
         # Feature #2: Check for Crystal Labyrinth trigger first
         if self.check_crystal_labyrinth_trigger(user_input):
             logger.info(f"Crystal Labyrinth triggered for user {user_id}")
-            return CRYSTAL_LABYRINTH_RESPONSE
+
+            # Create the World Node immediately for Magic Moment
+            try:
+                world_node = WorldNode(
+                    user_id=user_id,
+                    title="The Crystal Labyrinth of Comparison",
+                    summary="A profound metaphor for the user's feelings of inadequacy and comparison."
+                )
+                db.add(world_node)
+                db.commit()
+                db.refresh(world_node)
+                node_id_for_frontend = world_node.id
+                logger.info(f"Created Crystal Labyrinth world node {world_node.id} for user {user_id}")
+            except Exception as e:
+                logger.error(f"Error creating Crystal Labyrinth world node: {e}")
+
+            return CRYSTAL_LABYRINTH_RESPONSE, node_id_for_frontend
         
         # Feature #1: Use Dream Weaver AI for normal responses
         if not self.model:
-            return self._fallback_response(user_input)
+            return self._fallback_response(user_input), None
         
         try:
             # Get recent chat history for context
@@ -68,11 +86,11 @@ class ChatService:
             # Feature #4: Create memory for meaningful conversations
             await self._maybe_create_memory(user_input, ai_response, user_id, db)
 
-            return ai_response
-            
+            return ai_response, None
+
         except Exception as e:
             logger.error(f"Error generating AI response: {e}")
-            return self._fallback_response(user_input)
+            return self._fallback_response(user_input), None
     
     def _fallback_response(self, user_input: str) -> str:
         """Fallback response when AI is not available"""
@@ -195,9 +213,27 @@ Be selective - only remember truly meaningful personal insights."""
             )
             db.add(memory)
             db.commit()
-            
+
         except Exception as e:
             logger.error(f"Error creating memory: {e}")
+
+    async def anchor_action_to_node(self, node_id: int, user_action: str, db: Session):
+        """Anchor a user action to a specific world node"""
+        try:
+            world_node = db.query(WorldNode).filter(WorldNode.id == node_id).first()
+
+            if not world_node:
+                raise ValueError("World node not found")
+
+            world_node.user_action = user_action
+            db.commit()
+
+            logger.info(f"Anchored action to world node {node_id}: {user_action[:50]}...")
+            return {"message": "Action anchored successfully"}
+
+        except Exception as e:
+            logger.error(f"Error anchoring action to node {node_id}: {e}")
+            raise
 
 
 # Global chat service instance
