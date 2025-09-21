@@ -47,31 +47,31 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-cosmic-900 via-cosmic-800 to-cosmic-700">
-      <div className="container mx-auto px-4 py-6 max-w-6xl">
+    <div className="min-h-screen bg-gradient-to-br from-cosmic-900 via-cosmic-800 to-cosmic-700 overflow-x-hidden">
+      <div className="container mx-auto px-2 sm:px-4 py-3 sm:py-6 max-w-6xl">
         {/* Header */}
-        <header className="text-center mb-8">
-          <div className="flex items-center justify-center mb-4">
-            <Sparkles className="w-8 h-8 text-antara-500 mr-3" />
-            <h1 className="text-4xl font-bold bg-gradient-to-r from-antara-400 to-antara-600 bg-clip-text text-transparent">
+        <header className="text-center mb-4 sm:mb-8">
+          <div className="flex items-center justify-center mb-2 sm:mb-4">
+            <Sparkles className="w-6 h-6 sm:w-8 sm:h-8 text-antara-500 mr-2 sm:mr-3" />
+            <h1 className="text-2xl sm:text-4xl font-bold bg-gradient-to-r from-antara-400 to-antara-600 bg-clip-text text-transparent">
               Antarā
             </h1>
           </div>
-          <p className="text-cosmic-300 text-lg">Your Inner World Awaits</p>
+          <p className="text-cosmic-300 text-sm sm:text-lg">Your Inner World Awaits</p>
         </header>
 
         {/* Navigation */}
         <Navigation currentView={currentView} onViewChange={setCurrentView} />
 
         {/* Main Content */}
-        <main className="mt-8">
+        <main className="mt-4 sm:mt-8">
           {currentView === 'chat' && <ChatWindow userId={userId} />}
           {currentView === 'world' && <WorldMap userId={userId} />}
           {currentView === 'memory' && <MemorySanctum userId={userId} />}
         </main>
 
         {/* Footer */}
-        <footer className="text-center mt-12 text-cosmic-400 text-sm">
+        <footer className="text-center mt-6 sm:mt-12 text-cosmic-400 text-xs sm:text-sm px-4">
           <p>✨ Where thoughts become constellations and memories find their sanctuary ✨</p>
         </footer>
       </div>

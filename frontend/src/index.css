@@ -7,11 +7,31 @@
 @layer base {
   * {
     @apply border-cosmic-700;
+    box-sizing: border-box;
   }
+
+  html, body {
+    overflow-x: hidden;
+    width: 100%;
+  }
+
   body {
     @apply bg-cosmic-900 text-cosmic-100 font-mystical;
     background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
     min-height: 100vh;
+  }
+
+  /* Mobile optimizations */
+  @media (max-width: 640px) {
+    /* Prevent zoom on input focus */
+    input, textarea, select {
+      font-size: 16px !important;
+    }
+
+    /* Ensure proper touch targets */
+    button {
+      min-height: 44px;
+    }
   }
 }
 
@@ -80,4 +100,39 @@
   overflow-y: auto;
   overflow-x: hidden;
   min-height: 0;
+}
+
+/* Mobile-specific optimizations */
+@media (max-width: 640px) {
+  /* Smaller scrollbar on mobile */
+  ::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  /* Ensure text doesn't overflow on small screens */
+  .dream-text {
+    font-size: 14px;
+    line-height: 1.5;
+  }
+
+  /* Optimize chat container height for mobile */
+  .chat-container {
+    height: 500px;
+  }
+
+  /* Prevent horizontal scroll */
+  body {
+    overflow-x: hidden;
+  }
+
+  /* Ensure proper touch targets */
+  button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+
+  /* Optimize input fields for mobile */
+  input, textarea {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
 }
