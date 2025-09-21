@@ -36,7 +36,7 @@ const WorldMap: React.FC<WorldMapProps> = ({ userId }) => {
     });
   };
 
-  const generateStarPosition = (index: number, total: number) => {
+  const generateStarPosition = (index: number, _total: number) => {
     // Create a spiral constellation pattern
     const angle = (index * 137.5) * (Math.PI / 180); // Golden angle for natural distribution
     const radius = Math.sqrt(index) * 40 + 100; // Spiral outward
@@ -145,7 +145,7 @@ const WorldMap: React.FC<WorldMapProps> = ({ userId }) => {
 
             {/* Connection lines between nearby stars */}
             <svg className="absolute inset-0 w-full h-full pointer-events-none opacity-20">
-              {worldNodes.map((node, index) => {
+              {worldNodes.map((_node, index) => {
                 if (index === 0) return null;
                 const currentPos = generateStarPosition(index, worldNodes.length);
                 const prevPos = generateStarPosition(index - 1, worldNodes.length);
